@@ -27,7 +27,7 @@ export function ProfileSelector({ onProfileChange, currentProfile, availableProf
               {profile.accountId}
             </option>
           ))
-          })}
+        }
       </select>
     </div>
   );

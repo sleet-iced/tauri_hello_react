@@ -80,7 +80,7 @@ pub fn load_near_credentials() -> CredentialResponse {
         // Skip files that don't match the expected network
         let parent_dir = path.parent().unwrap();
         let dir_name = parent_dir.file_name().unwrap().to_str().unwrap();
-        if dir_name != *network {
+        if dir_name != network {
             log::warn!("Skipping file with mismatched network directory: {}", path.display());
             continue;
         }

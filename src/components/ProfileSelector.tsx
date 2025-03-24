@@ -3,6 +3,7 @@ import './ProfileSelector.css';
 type Profile = {
   accountId: string;
   publicKey: string;
+  network: 'mainnet' | 'testnet';
 };
 
 interface ProfileSelectorProps {

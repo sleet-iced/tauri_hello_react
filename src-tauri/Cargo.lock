@@ -5150,6 +5150,7 @@ name = "tauri_hello"
 version = "0.1.0"
 dependencies = [
  "dirs",
+ "log",
  "near-jsonrpc-client",
  "near-jsonrpc-primitives",
  "near-primitives",

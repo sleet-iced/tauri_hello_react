@@ -74,25 +74,15 @@ pub fn load_near_credentials() -> CredentialResponse {
             continue;
         }
 
-        // Use the full filename without .json extension as the account name
-        let account_name = file_name.to_string();
-
-        // Skip files that don't match the expected network
-        let parent_dir = path.parent().unwrap();
-        let dir_name = parent_dir.file_name().unwrap().to_str().unwrap();
-        if dir_name != network {
-            log::warn!("Skipping file with mismatched network directory: {}", path.display());
-            continue;
-        }
-
+        // Use the account ID from the credential file instead of filename
         log::info!("Attempting to read credentials file at {}", path.display());
         if let Ok(content) = fs::read_to_string(&path) {
             log::debug!("File content: {}", content);
             match serde_json::from_str::<RawCredential>(&content) {
                 Ok(raw_cred) => {
-                    log::info!("Found valid {} credential: {}", network, account_name);
+                    log::info!("Found valid {} credential: {}", network, raw_cred.account_id);
                     credentials.push(NearCredential {
-                        account_id: account_name,
+                        account_id: raw_cred.account_id,
                         public_key: raw_cred.public_key,
                         network: network.to_string(),
                         private_key: Some(raw_cred.private_key),

@@ -44,9 +44,6 @@
   transition: filter 0.75s;
 }
 
-.sleet-logo:hover {
-  filter: drop-shadow(0 0 2em #24c8db);
-}
 
 .row {
   display: flex;

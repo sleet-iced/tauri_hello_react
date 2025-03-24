@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import './NetworkSelector.css';
 
 type Network = 'testnet' | 'mainnet';
 

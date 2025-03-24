@@ -17,7 +17,7 @@ mkdir -p "$ICONS_DIR"
 create_png_icon() {
     local size=$1
     local output=$2
-    convert "$SOURCE_ICON" -resize ${size}x${size} -alpha on -define png:format=png32 "$ICONS_DIR/$output"
+    magick "$SOURCE_ICON" -resize ${size}x${size} -alpha on -define png:format=png32 "$ICONS_DIR/$output"
     echo "Created $output"
 }
 
@@ -39,11 +39,11 @@ create_png_icon 310 "Square310x310Logo.png"
 create_png_icon 50 "StoreLogo.png"
 
 # Create icon.png (1024x1024 for high resolution)
-convert "$SOURCE_ICON" -resize 1024x1024 "$ICONS_DIR/icon.png"
+magick "$SOURCE_ICON" -resize 1024x1024 "$ICONS_DIR/icon.png"
 echo "Created icon.png"
 
 # Create .ico file for Windows
-convert "$SOURCE_ICON" -define icon:auto-resize=256,128,96,64,48,32,16 "$ICONS_DIR/icon.ico"
+magick "$SOURCE_ICON" -define icon:auto-resize=256,128,96,64,48,32,16 "$ICONS_DIR/icon.ico"
 echo "Created icon.ico"
 
 # Create .icns file for macOS
@@ -53,16 +53,16 @@ if command -v iconutil &> /dev/null; then
     mkdir -p "$ICONSET"
 
     # Generate iconset
-    convert "$SOURCE_ICON" -resize 16x16 "$ICONSET/icon_16x16.png"
-    convert "$SOURCE_ICON" -resize 32x32 "$ICONSET/icon_16x16@2x.png"
-    convert "$SOURCE_ICON" -resize 32x32 "$ICONSET/icon_32x32.png"
-    convert "$SOURCE_ICON" -resize 64x64 "$ICONSET/icon_32x32@2x.png"
-    convert "$SOURCE_ICON" -resize 128x128 "$ICONSET/icon_128x128.png"
-    convert "$SOURCE_ICON" -resize 256x256 "$ICONSET/icon_128x128@2x.png"
-    convert "$SOURCE_ICON" -resize 256x256 "$ICONSET/icon_256x256.png"
-    convert "$SOURCE_ICON" -resize 512x512 "$ICONSET/icon_256x256@2x.png"
-    convert "$SOURCE_ICON" -resize 512x512 "$ICONSET/icon_512x512.png"
-    convert "$SOURCE_ICON" -resize 1024x1024 "$ICONSET/icon_512x512@2x.png"
+    magick "$SOURCE_ICON" -resize 16x16 "$ICONSET/icon_16x16.png"
+    magick "$SOURCE_ICON" -resize 32x32 "$ICONSET/icon_16x16@2x.png"
+    magick "$SOURCE_ICON" -resize 32x32 "$ICONSET/icon_32x32.png"
+    magick "$SOURCE_ICON" -resize 64x64 "$ICONSET/icon_32x32@2x.png"
+    magick "$SOURCE_ICON" -resize 128x128 "$ICONSET/icon_128x128.png"
+    magick "$SOURCE_ICON" -resize 256x256 "$ICONSET/icon_128x128@2x.png"
+    magick "$SOURCE_ICON" -resize 256x256 "$ICONSET/icon_256x256.png"
+    magick "$SOURCE_ICON" -resize 512x512 "$ICONSET/icon_256x256@2x.png"
+    magick "$SOURCE_ICON" -resize 512x512 "$ICONSET/icon_512x512.png"
+    magick "$SOURCE_ICON" -resize 1024x1024 "$ICONSET/icon_512x512@2x.png"
 
     # Convert iconset to .icns
     iconutil -c icns -o "$ICONS_DIR/icon.icns" "$ICONSET"

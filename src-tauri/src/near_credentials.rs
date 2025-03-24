@@ -19,8 +19,11 @@ pub struct CredentialResponse {
 
 #[derive(Debug, Deserialize)]
 struct RawCredential {
+    #[serde(rename = "accountId")]
     account_id: String,
+    #[serde(rename = "publicKey")]
     public_key: String,
+    #[serde(rename = "privateKey")]
     private_key: String,
 }
 

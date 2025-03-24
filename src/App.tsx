@@ -16,15 +16,31 @@ function App() {
 
   useEffect(() => {
     async function loadProfiles() {
-      const response = await loadNearCredentials();
-      if (response.error) {
-        setError(response.error);
-        return;
-      }
-      const networkProfiles = response.credentials.filter(cred => cred.network === network);
-      setProfiles(networkProfiles);
-      if (networkProfiles.length > 0) {
-        setCurrentProfile(networkProfiles[0]);
+      try {
+        const response = await loadNearCredentials();
+        console.debug('Loaded credentials:', response);
+
+        if (response.error) {
+          setError(`Backend Error: ${response.error}`);
+          setProfiles([]);
+          setCurrentProfile(null);
+          return;
+        }
+
+        const networkProfiles = response.credentials.filter(cred => cred.network === network);
+        setProfiles(networkProfiles);
+
+        if (networkProfiles.length === 0) {
+          setError(`No ${network} accounts found. Check ~/.near-credentials/${network}/`);
+          setCurrentProfile(null);
+        } else {
+          setCurrentProfile(networkProfiles[0]);
+          setError('');
+        }
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Unknown credential loading error';
+        setError(`Frontend Error: ${errorMessage}`);
+        console.error('Profile loading failed:', err);
       }
     }
     loadProfiles();

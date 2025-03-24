@@ -31,12 +31,22 @@
 }
 
 .header {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   padding: 1rem;
   box-sizing: border-box;
+  background: rgba(255,255,255,0.9);
+  z-index: 1000;
+}
+
+.profile-error {
+  color: #dc3545;
+  padding: 0.5rem;
+  border: 1px solid #dc3545;
+  border-radius: 4px;
+  margin-top: 0.5rem;
 }
 
 .sleet-logo {

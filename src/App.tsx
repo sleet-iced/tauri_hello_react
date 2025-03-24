@@ -49,12 +49,14 @@ function App() {
     <main className="container">
       <div className="header">
         <NetworkSelector onNetworkChange={setNetwork} currentNetwork={network} />
-        {currentProfile && (
+        {profiles.length > 0 ? (
           <ProfileSelector
             onProfileChange={setCurrentProfile}
             currentProfile={currentProfile}
             availableProfiles={profiles}
           />
+        ) : (
+          <div className="profile-error">No accounts found in {network}</div>
         )}
       </div>
       <img src={sleetLogo} alt="Sleet logo" className="sleet-logo" />

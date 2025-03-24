@@ -26,7 +26,7 @@ export function ProfileSelector({ onProfileChange, currentProfile, availableProf
         className="profile-select"
       >
         {availableProfiles.map((profile) => (
-          <option key={profile.publicKey} value={profile.accountId}>
+          <option key={profile.accountId} value={profile.accountId}>
             {profile.accountId}
           </option>
         ))}

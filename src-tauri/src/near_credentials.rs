@@ -20,12 +20,16 @@ pub struct CredentialResponse {
 
 #[derive(Debug, Deserialize)]
 struct RawCredential {
-    #[serde(rename = "accountId")]
+    #[serde(rename = "implicit_account_id")]
     account_id: String,
-    #[serde(rename = "publicKey")]
+    #[serde(rename = "public_key")]
     public_key: String,
-    #[serde(rename = "privateKey")]
+    #[serde(rename = "private_key")]
     private_key: String,
+    #[serde(rename = "seed_phrase_hd_path")]
+    _hd_path: Option<String>,
+    #[serde(rename = "master_seed_phrase")]
+    _seed_phrase: Option<String>,
 }
 
 #[tauri::command]
@@ -41,7 +45,7 @@ pub fn load_near_credentials() -> CredentialResponse {
     let near_credentials_dir = home_dir.join(".near-credentials");
     log::info!("Looking for credentials in: {}", near_credentials_dir.display());
 
-    let networks = vec!["mainnet", "testnet"];
+    let networks = vec!["mainnet", "testnet", "implicit"];
     let mut credentials = Vec::new();
 
 
@@ -78,12 +82,7 @@ pub fn load_near_credentials() -> CredentialResponse {
                         });
                     }
                     Err(e) => {
-                        log::error!(
-                            "Failed to parse {}: {}. Partial content: {}...",
-                            path.display(),
-                            e,
-                            content.chars().take(200).collect::<String>()
-                        );
+                        log::error!("Failed to parse {}: {}", entry.path().display(), e);
                     }
                 }
             } else {

@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use std::fs;
 use toml;
+mod error;
+use error::NearError;
 
 #[derive(Debug, Deserialize)]
 struct NetworkConfig {
@@ -22,11 +24,9 @@ pub struct GreetingResponse {
 }
 
 #[tauri::command]
-pub async fn get_near_greeting() -> Result<String, String> {
-    let config_str = fs::read_to_string("src/network_config.toml")
-        .map_err(|e| format!("Failed to read config file: {}", e))?;
-    let config: Config = toml::from_str(&config_str)
-        .map_err(|e| format!("Failed to parse config file: {}", e))?;
+pub async fn get_near_greeting() -> Result<String, NearError> {
+    let config_str = fs::read_to_string("src/network_config.toml")?;
+    let config: Config = toml::from_str(&config_str)?;
 
     // Using testnet configuration
     let rpc_url = config.testnet.rpc_url;
@@ -34,7 +34,7 @@ pub async fn get_near_greeting() -> Result<String, String> {
 
     let provider = near_jsonrpc_client::JsonRpcClient::connect(rpc_url);
     let account_id = AccountId::from_str(&contract_id)
-        .map_err(|e| format!("Invalid account ID: {}", e))?;
+        .map_err(|e| NearError::ContractError(format!("Invalid account ID: {}", e)))?;
 
     let args = serde_json::json!({});
     let query_response = provider
@@ -46,18 +46,16 @@ pub async fn get_near_greeting() -> Result<String, String> {
                 args: args.to_string().into_bytes().into(),
             },
         })
-        .await
-        .map_err(|e| format!("RPC error: {}", e))?;
+        .await?;
 
     if let near_jsonrpc_client::methods::query::RpcQueryResponse {
         kind: near_jsonrpc_primitives::types::query::QueryResponseKind::CallResult(result),
         ..
     } = query_response
     {
-        let result: GreetingResponse = serde_json::from_slice(&result.result)
-            .map_err(|e| format!("Failed to parse response: {}", e))?;
+        let result: GreetingResponse = serde_json::from_slice(&result.result)?;
         Ok(result.greeting)
     } else {
-        Err("Unexpected response type".to_string())
+        Err(NearError::ContractError("Unexpected response type".to_string()))
     }
 }

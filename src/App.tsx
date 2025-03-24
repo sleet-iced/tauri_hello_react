@@ -18,10 +18,12 @@ function App() {
     try {
       setIsLoading(true);
       setError("");
-      const greeting = await invoke("get_near_greeting");
+      const greeting = await invoke<string>("get_near_greeting");
       setNearGreeting(greeting);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch greeting");
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(errorMessage);
+      console.error("NEAR greeting error:", err);
     } finally {
       setIsLoading(false);
     }

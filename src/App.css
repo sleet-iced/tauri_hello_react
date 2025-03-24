@@ -26,6 +26,16 @@
   flex-direction: column;
   justify-content: center;
   text-align: center;
+  position: relative;
+}
+
+.header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 1rem;
+  box-sizing: border-box;
 }
 
 .sleet-logo {

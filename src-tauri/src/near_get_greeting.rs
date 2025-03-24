@@ -37,13 +37,19 @@ pub struct GreetingResponse {
 }
 
 #[tauri::command]
-pub async fn get_near_greeting() -> Result<String, String> {
+pub async fn get_near_greeting(network: String) -> Result<String, String> {
     let config_str = fs::read_to_string("src/network_config.toml").map_err(|e| e.to_string())?;
     let config: Config = toml::from_str(&config_str).map_err(|e| e.to_string())?;
 
-    // Using testnet configuration
-    let rpc_url = config.testnet.rpc_url;
-    let contract_id = config.testnet.contract_id;
+    // Get configuration based on selected network
+    let network_config = match network.as_str() {
+        "mainnet" => &config.mainnet,
+        "testnet" => &config.testnet,
+        _ => return Err("Invalid network specified".to_string()),
+    };
+
+    let rpc_url = &network_config.rpc_url;
+    let contract_id = &network_config.contract_id;
 
     let provider = near_jsonrpc_client::JsonRpcClient::connect(rpc_url);
     let account_id = AccountId::from_str(&contract_id)

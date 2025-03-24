@@ -1,6 +1,7 @@
 import { useState } from "react";
 import sleetLogo from "./assets/sleet_icon.svg";
 import { invoke } from "@tauri-apps/api/core";
+import { NetworkSelector } from "./components/NetworkSelector";
 import "./App.css";
 
 function App() {
@@ -9,6 +10,7 @@ function App() {
   const [nearGreeting, setNearGreeting] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [network, setNetwork] = useState<'testnet' | 'mainnet'>('testnet');
 
   async function greet() {
     setGreetMsg(await invoke("greet", { name }));
@@ -18,7 +20,7 @@ function App() {
     try {
       setIsLoading(true);
       setError("");
-      const greeting = await invoke<string>("get_near_greeting");
+      const greeting = await invoke<string>("get_near_greeting", { network });
       setNearGreeting(greeting);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
@@ -31,6 +33,9 @@ function App() {
 
   return (
     <main className="container">
+      <div className="header">
+        <NetworkSelector onNetworkChange={setNetwork} currentNetwork={network} />
+      </div>
       <img src={sleetLogo} alt="Sleet logo" className="sleet-logo" />
       <h1>hello.sleet.near</h1>
       <p>🧜‍♂️ a tauri hello project by sleet<br/>to interact with a hello smart contract on near</p>

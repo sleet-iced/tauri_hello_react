@@ -27,15 +27,10 @@ function App() {
           return;
         }
 
-        const networkProfiles = response.credentials.filter(cred => cred.network === network);
+        const networkProfiles = response.credentials;
         setProfiles(networkProfiles);
-
-        if (networkProfiles.length === 0) {
-          setError(`No ${network} accounts found. Check ~/.near-credentials/${network}/`);
-          setCurrentProfile(null);
-        } else {
+        if (networkProfiles.length > 0) {
           setCurrentProfile(networkProfiles[0]);
-          setError('');
         }
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown credential loading error';

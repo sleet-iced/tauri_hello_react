@@ -72,11 +72,14 @@ pub fn load_near_credentials() -> CredentialResponse {
                 log::debug!("File content: {}", content);
                 match serde_json::from_str::<RawCredential>(&content) {
                     Ok(raw_cred) => {
-                        let network_type = match network {
+                        let dir_name = entry.file_name().to_str().unwrap();
+                        let (account_id_part, network_type) = dir_name.rsplit_once('.')
+                            .unwrap_or_else(|| (dir_name, "unknown"));
+                        let network_type = match network_type {
                             "mainnet" => "mainnet",
                             "testnet" => "testnet",
                             "implicit" => "testnet",
-                            _ => continue,
+                            _ => "testnet",
                         };
 
                         log::info!("Found valid {} credential: {}", network_type, raw_cred.account_id);

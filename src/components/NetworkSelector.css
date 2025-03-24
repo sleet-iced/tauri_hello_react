@@ -6,13 +6,31 @@
 
 .network-select {
   padding: 0.5rem;
-  border-radius: 4px;
+  border-radius: 8px;
   border: 1px solid #ccc;
   background-color: transparent;
   font-size: 0.9rem;
   cursor: pointer;
   outline: none;
   width: 120px;
+  font-family: 'Offside', sans-serif;
+  color: inherit;
+}
+
+@media (prefers-color-scheme: dark) {
+  .network-select {
+    color: #ffffff;
+    border-color: #7d84b2;
+  }
+  
+  .network-select:hover {
+    border-color: #8e9dcc;
+  }
+  
+  .network-select:focus {
+    border-color: #d9dbf1;
+    box-shadow: 0 0 0 2px rgba(217, 219, 241, 0.2);
+  }
 }
 
 .network-select:hover {

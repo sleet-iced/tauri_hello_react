@@ -64,16 +64,19 @@ pub fn load_near_credentials() -> CredentialResponse {
             .filter(|e| e.path().extension().and_then(|s| s.to_str()) == Some("json")) 
         {
             let path = entry.path();
+            log::info!("Attempting to read credentials file at {}", path.display());
             if let Ok(content) = fs::read_to_string(&path) {
-                log::info!("Reading credentials file at {}", path.display());
+                log::debug!("File content: {}", content);
                 match serde_json::from_str::<RawCredential>(&content) {
                     Ok(raw_cred) => {
                         let network_type = match network {
                             "mainnet" => "mainnet",
                             "testnet" => "testnet",
+                            "implicit" => "testnet",
                             _ => continue,
                         };
 
+                        log::info!("Found valid {} credential: {}", network_type, raw_cred.account_id);
                         credentials.push(NearCredential {
                             account_id: raw_cred.account_id,
                             public_key: raw_cred.public_key,
@@ -82,7 +85,8 @@ pub fn load_near_credentials() -> CredentialResponse {
                         });
                     }
                     Err(e) => {
-                        log::error!("Failed to parse {}: {}", entry.path().display(), e);
+                        log::error!("Failed to parse {}: {}", path.display(), e);
+                        log::warn!("Problematic file content: {}", content);
                     }
                 }
             } else {

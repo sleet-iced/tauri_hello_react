@@ -67,9 +67,17 @@ pub async fn get_near_greeting() -> Result<String, String> {
         ..
     } = query_response
     {
-        let result: GreetingResponse = serde_json::from_slice(&result.result)
-            .map_err(|e| format!("Failed to parse response: {}", e))?;
-        Ok(result.greeting)
+        // Try to parse as JSON object first
+        match serde_json::from_slice::<GreetingResponse>(&result.result) {
+            Ok(response) => Ok(response.greeting),
+            Err(_) => {
+                // If JSON parsing fails, try to parse as a plain string
+                match String::from_utf8(result.result.to_vec()) {
+                    Ok(greeting) => Ok(greeting.trim_matches('"').to_string()),
+                    Err(e) => Err(format!("Failed to parse response as string: {}", e))
+                }
+            }
+        }
     } else {
         Err("Unexpected response type".to_string())
     }

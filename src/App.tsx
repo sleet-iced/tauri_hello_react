@@ -31,7 +31,7 @@ function App() {
           onChange={(e) => setName(e.currentTarget.value)}
           placeholder="Enter a name..."
         />
-        <button type="submit">Greet</button>
+        <button type="submit">GET RUST GREETING</button>
       </form>
       <p>{greetMsg}</p>
     </main>

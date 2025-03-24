@@ -15,7 +15,7 @@ function App() {
   return (
     <main className="container">
 
-<img src={sleetLogo} alt="Sleet logo" />
+<img src={sleetLogo} alt="Sleet logo" className="sleet-logo" />
       <h1>hello.sleet.near</h1>
       <p>🧜‍♂️ a tauri hello project by sleet<br/>to interact with a hello smart contract on near</p>
 

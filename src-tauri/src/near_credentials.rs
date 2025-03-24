@@ -48,59 +48,57 @@ pub fn load_near_credentials() -> CredentialResponse {
     let near_credentials_dir = home_dir.join(".near-credentials");
     log::info!("Looking for credentials in: {}", near_credentials_dir.display());
 
-    let networks = vec!["mainnet", "testnet", "implicit"];
     let mut credentials = Vec::new();
 
+    let entries = walkdir::WalkDir::new(near_credentials_dir)
+        .into_iter()
+        .filter_map(|e| e.ok())
+        .filter(|e| e.path().extension().and_then(|s| s.to_str()) == Some("json"));
 
-    for network in networks {
-        let network_dir = near_credentials_dir.join(network);
-        log::info!("Checking {} network directory: {}", network, network_dir.display());
+    for entry in entries {
+        let path = entry.path();
+        let file_name = match path.file_stem().and_then(|s| s.to_str()) {
+            Some(name) => name,
+            None => {
+                log::warn!("Could not get file stem for {}", path.display());
+                continue;
+            }
+        };
         
-        if !network_dir.exists() {
-            log::warn!("{} directory does not exist", network_dir.display());
+        let parts: Vec<&str> = file_name.split('.').collect();
+        if parts.len() < 2 {
+            log::warn!("Skipping file with invalid name: {}", path.display());
+            continue;
+        }
+        
+        let network = parts.last().unwrap();
+        let account_name = parts[..parts.len() - 1].join(".");
+        
+        if network != &"mainnet" && network != &"testnet" {
+            log::warn!("Skipping file with unsupported network: {}", path.display());
             continue;
         }
 
-        for entry in walkdir::WalkDir::new(network_dir)
-            .into_iter()
-            .filter_map(|e| e.ok())
-            .filter(|e| e.path().extension().and_then(|s| s.to_str()) == Some("json")) 
-        {
-            let path = entry.path();
-            log::info!("Attempting to read credentials file at {}", path.display());
-            if let Ok(content) = fs::read_to_string(&path) {
-                log::debug!("File content: {}", content);
-                match serde_json::from_str::<RawCredential>(&content) {
-                    Ok(raw_cred) => {
-                        let network_type = match network {
-                            "mainnet" => "mainnet",
-                            "testnet" => "testnet",
-                            "implicit" => "testnet",
-                            _ => "testnet",
-                        };
-
-                        log::info!("Found valid {} credential: {}", network_type, raw_cred.account_id);
-                        let account_name = path.parent()
-                            .and_then(|p| p.file_name())
-                            .and_then(|s| s.to_str())
-                            .unwrap_or_default()
-                            .to_string();
-
-                        credentials.push(NearCredential {
-                            account_id: account_name,
-                            public_key: raw_cred.public_key,
-                            network: network_type.to_string(),
-                            private_key: Some(raw_cred.private_key),
-                        });
-                    }
-                    Err(e) => {
-                        log::error!("Failed to parse {}: {}", path.display(), e);
-                        log::warn!("Problematic file content: {}", content);
-                    }
+        log::info!("Attempting to read credentials file at {}", path.display());
+        if let Ok(content) = fs::read_to_string(&path) {
+            log::debug!("File content: {}", content);
+            match serde_json::from_str::<RawCredential>(&content) {
+                Ok(raw_cred) => {
+                    log::info!("Found valid {} credential: {}", network, account_name);
+                    credentials.push(NearCredential {
+                        account_id: account_name,
+                        public_key: raw_cred.public_key,
+                        network: network.to_string(),
+                        private_key: Some(raw_cred.private_key),
+                    });
                 }
-            } else {
-                log::warn!("Failed to read credentials file at {}", path.display());
+                Err(e) => {
+                    log::error!("Failed to parse {}: {}", path.display(), e);
+                    log::warn!("Problematic file content: {}", content);
+                }
             }
+        } else {
+            log::warn!("Failed to read credentials file at {}", path.display());
         }
     }
 

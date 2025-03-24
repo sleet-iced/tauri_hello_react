@@ -7,9 +7,13 @@
 ### Dev and Build
 
 ```sh
+# Install
 pnpm install
 pnpm tauri dev
-
+# Error Check
+npx tsc --noEmit --jsx react
+cd src-tauri && cargo check
+# Build
 pnpm tauri build
 ```
 

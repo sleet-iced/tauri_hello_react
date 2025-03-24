@@ -1,24 +1,20 @@
 import './ProfileSelector.css';
 
-type Profile = {
-  accountId: string;
-  publicKey: string;
-  network: 'mainnet' | 'testnet';
-};
+import { type NearCredential } from '../utils/near-credentials';
 
 interface ProfileSelectorProps {
-  onProfileChange: (profile: Profile) => void;
-  currentProfile: Profile;
-  availableProfiles: Profile[];
+  onProfileChange: (profile: NearCredential) => void;
+  currentProfile: NearCredential | null;
+  availableProfiles: NearCredential[];
 }
 
 export function ProfileSelector({ onProfileChange, currentProfile, availableProfiles }: ProfileSelectorProps) {
   return (
     <div className="profile-selector">
       <select
-        value={currentProfile.accountId}
+        value={currentProfile?.accountId || ''}
         onChange={(e) => {
-          const selectedProfile = availableProfiles.find(p => p.accountId === e.target.value);
+          const selectedProfile = availableProfiles.find(p => p.accountId === e.target.value) || null;
           if (selectedProfile) {
             onProfileChange(selectedProfile);
           }
@@ -26,8 +22,8 @@ export function ProfileSelector({ onProfileChange, currentProfile, availableProf
         className="profile-select"
       >
         {availableProfiles.map((profile) => (
-          <option key={profile.accountId} value={profile.accountId}>
-            {profile.accountId}
+          <option key={profile.accountId} ({profile.network}) value={profile.accountId} ({profile.network})>
+            {profile.accountId} ({profile.network})
           </option>
         ))}
       </select>

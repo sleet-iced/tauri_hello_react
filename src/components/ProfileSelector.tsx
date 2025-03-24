@@ -22,8 +22,8 @@ export function ProfileSelector({ onProfileChange, currentProfile, availableProf
         className="profile-select"
       >
         {availableProfiles.map((profile) => (
-          <option key={profile.accountId} ({profile.network}) value={profile.accountId} ({profile.network})>
-            {profile.accountId} ({profile.network})
+          <option key={`${profile.accountId}-${profile.network}`} value={`${profile.accountId}-${profile.network}`}>
+            {`${profile.accountId} (${profile.network})`}
           </option>
         ))}
       </select>

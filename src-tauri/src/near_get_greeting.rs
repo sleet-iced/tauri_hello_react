@@ -12,7 +12,7 @@ pub enum NearError {
     #[error("TOML parsing error: {0}")]
     TomlError(#[from] toml::de::Error),
     #[error("NEAR RPC error: {0}")]
-    RpcError(#[from] near_jsonrpc_client::errors::JsonRpcError),
+    RpcError(#[from] near_jsonrpc_client::errors::JsonRpcError<near_jsonrpc_primitives::types::query::RpcQueryError>),
     #[error("Contract error: {0}")]
     ContractError(String),
     #[error("Response parsing error: {0}")]

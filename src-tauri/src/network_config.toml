@@ -1,0 +1,7 @@
+[testnet]
+rpc_url = "https://rpc.testnet.near.org"
+contract_id = "hello.sleet.testnet"
+
+[mainnet]
+rpc_url = "https://rpc.mainnet.near.org"
+contract_id = "hello.sleet.near"

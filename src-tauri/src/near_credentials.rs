@@ -5,9 +5,12 @@ use log;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct NearCredential {
+    #[serde(rename = "accountId")]
     pub account_id: String,
+    #[serde(rename = "publicKey")]
     pub public_key: String,
     pub network: String,
+    // Note: Network value must match TypeScript's 'mainnet'|'testnet' specification
     #[serde(skip_serializing)]
     pub private_key: Option<String>,
 }

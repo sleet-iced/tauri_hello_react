@@ -12,7 +12,7 @@ export function ProfileSelector({ onProfileChange, currentProfile, availableProf
   return (
     <div className="profile-selector">
       <select
-        value={currentProfile?.accountId || ''}
+        value={currentProfile ? `${currentProfile.accountId}-${currentProfile.network}` : ''}
         onChange={(e) => {
           const [accountId, network] = e.target.value.split('-');
           const selectedProfile = availableProfiles.find(p => p.accountId === accountId && p.network === network);

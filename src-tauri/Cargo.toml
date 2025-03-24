@@ -27,4 +27,5 @@ near-primitives = "0.17"
 near-jsonrpc-client = "0.6"
 near-jsonrpc-primitives = "0.17"
 thiserror = "1.0"
+dirs = "6.0.0"
 

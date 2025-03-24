@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import sleetLogo from "./assets/sleet_icon.svg";
 import { invoke } from "@tauri-apps/api/core";
 import { NetworkSelector } from "./components/NetworkSelector";
+import { ProfileSelector } from "./components/ProfileSelector";
+import { loadNearCredentials, type NearCredential } from "./utils/near-credentials";
 import "./App.css";
 
 function App() {
@@ -9,6 +11,24 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [network, setNetwork] = useState<'testnet' | 'mainnet'>('testnet');
+  const [profiles, setProfiles] = useState<NearCredential[]>([]);
+  const [currentProfile, setCurrentProfile] = useState<NearCredential | null>(null);
+
+  useEffect(() => {
+    async function loadProfiles() {
+      const response = await loadNearCredentials();
+      if (response.error) {
+        setError(response.error);
+        return;
+      }
+      const networkProfiles = response.credentials.filter(cred => cred.network === network);
+      setProfiles(networkProfiles);
+      if (networkProfiles.length > 0) {
+        setCurrentProfile(networkProfiles[0]);
+      }
+    }
+    loadProfiles();
+  }, [network]);
 
   async function fetchNearGreeting() {
     try {
@@ -29,6 +49,13 @@ function App() {
     <main className="container">
       <div className="header">
         <NetworkSelector onNetworkChange={setNetwork} currentNetwork={network} />
+        {currentProfile && (
+          <ProfileSelector
+            onProfileChange={setCurrentProfile}
+            currentProfile={currentProfile}
+            availableProfiles={profiles}
+          />
+        )}
       </div>
       <img src={sleetLogo} alt="Sleet logo" className="sleet-logo" />
       <h1>hello.sleet.near</h1>

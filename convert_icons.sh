@@ -17,7 +17,7 @@ mkdir -p "$ICONS_DIR"
 create_png_icon() {
     local size=$1
     local output=$2
-    convert "$SOURCE_ICON" -resize ${size}x${size} "$ICONS_DIR/$output"
+    convert "$SOURCE_ICON" -resize ${size}x${size} -alpha on -define png:format=png32 "$ICONS_DIR/$output"
     echo "Created $output"
 }
 

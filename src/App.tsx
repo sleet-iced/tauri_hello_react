@@ -5,16 +5,10 @@ import { NetworkSelector } from "./components/NetworkSelector";
 import "./App.css";
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
   const [nearGreeting, setNearGreeting] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [network, setNetwork] = useState<'testnet' | 'mainnet'>('testnet');
-
-  async function greet() {
-    setGreetMsg(await invoke("greet", { name }));
-  }
 
   async function fetchNearGreeting() {
     try {
@@ -39,22 +33,6 @@ function App() {
       <img src={sleetLogo} alt="Sleet logo" className="sleet-logo" />
       <h1>hello.sleet.near</h1>
       <p>🧜‍♂️ a tauri hello project by sleet<br/>to interact with a hello smart contract on near</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">GET RUST GREETING</button>
-      </form>
-      <p>{greetMsg}</p>
 
       <div className="near-greeting">
         <button 

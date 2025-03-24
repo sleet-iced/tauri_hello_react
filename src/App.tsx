@@ -6,16 +6,30 @@ import "./App.css";
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
   const [name, setName] = useState("");
+  const [nearGreeting, setNearGreeting] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
     setGreetMsg(await invoke("greet", { name }));
+  }
+
+  async function fetchNearGreeting() {
+    try {
+      setIsLoading(true);
+      setError("");
+      const greeting = await invoke("get_near_greeting");
+      setNearGreeting(greeting);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch greeting");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
     <main className="container">
-
-<img src={sleetLogo} alt="Sleet logo" className="sleet-logo" />
+      <img src={sleetLogo} alt="Sleet logo" className="sleet-logo" />
       <h1>hello.sleet.near</h1>
       <p>🧜‍♂️ a tauri hello project by sleet<br/>to interact with a hello smart contract on near</p>
 
@@ -34,6 +48,17 @@ function App() {
         <button type="submit">GET RUST GREETING</button>
       </form>
       <p>{greetMsg}</p>
+
+      <div className="near-greeting">
+        <button 
+          onClick={fetchNearGreeting}
+          disabled={isLoading}
+        >
+          {isLoading ? "Loading..." : "Get NEAR Contract Greeting"}
+        </button>
+        {nearGreeting && <p>Contract says: {nearGreeting}</p>}
+        {error && <p className="error">{error}</p>}
+      </div>
     </main>
   );
 }

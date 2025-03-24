@@ -83,8 +83,14 @@ pub fn load_near_credentials() -> CredentialResponse {
                         };
 
                         log::info!("Found valid {} credential: {}", network_type, raw_cred.account_id);
+                        let account_name = path.parent()
+                            .and_then(|p| p.file_name())
+                            .and_then(|s| s.to_str())
+                            .unwrap_or_default()
+                            .to_string();
+
                         credentials.push(NearCredential {
-                            account_id: raw_cred.account_id,
+                            account_id: account_name,
                             public_key: raw_cred.public_key,
                             network: network_type.to_string(),
                             private_key: Some(raw_cred.private_key),

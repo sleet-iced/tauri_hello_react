@@ -1,7 +1,21 @@
-# Tauri + React + Typescript
+# Hello
+🧜‍♂️ a tauri hello project by sleet to interact with a hello smart contract on near
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
 
-## Recommended IDE Setup
+---
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+### Dev and Build
+
+```sh
+pnpm install
+pnpm tauri dev
+
+pnpm tauri build
+```
+
+
+
+---
+
+
+copyright 2025 by sleet.near

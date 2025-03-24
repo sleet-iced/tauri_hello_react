@@ -46,15 +46,20 @@ pub fn load_near_credentials() -> CredentialResponse {
 
     let mut credentials = Vec::new();
 
-    let entries = std::fs::read_dir(&near_credentials_dir)
-        .into_iter()
-        .filter_map(|dir| dir.ok())
-        .filter(|entry| entry.file_type().map(|ft| ft.is_dir()).unwrap_or(false))
-        .filter(|entry| {
-            let name = entry.file_name();
-            let network = name.to_str().unwrap_or("");
-            network == "mainnet" || network == "testnet"
-        });
+    let entries = match std::fs::read_dir(&near_credentials_dir) {
+        Ok(entries) => entries
+            .filter_map(|entry| entry.ok())
+            .filter(|entry| entry.file_type().ok().map_or(false, |ft| ft.is_dir()))
+            .filter(|entry| {
+                let name = entry.file_name();
+                let network = name.to_str().unwrap_or("");
+                network == "mainnet" || network == "testnet"
+            }),
+        Err(_) => return CredentialResponse {
+            credentials: Vec::new(),
+            error: Some("Failed to read credentials directory".to_string()),
+        },
+    };
 
     for network_dir in entries {
         let network = network_dir.file_name().to_str().unwrap_or("").to_string();
@@ -99,8 +104,6 @@ pub fn load_near_credentials() -> CredentialResponse {
             }
         }
     }
-    }
-
     CredentialResponse {
         credentials,
         error: None,

@@ -5161,6 +5161,7 @@ dependencies = [
  "tauri-plugin-opener",
  "thiserror 1.0.69",
  "toml 0.8.20",
+ "walkdir",
 ]
 
 [[package]]

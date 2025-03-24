@@ -14,7 +14,8 @@ export function ProfileSelector({ onProfileChange, currentProfile, availableProf
       <select
         value={currentProfile?.accountId || ''}
         onChange={(e) => {
-          const selectedProfile = availableProfiles.find(p => p.accountId === e.target.value) || null;
+          const [accountId, network] = e.target.value.split('-');
+          const selectedProfile = availableProfiles.find(p => p.accountId === accountId && p.network === network);
           if (selectedProfile) {
             onProfileChange(selectedProfile);
           }

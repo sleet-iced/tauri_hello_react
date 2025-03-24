@@ -33,7 +33,7 @@ pub async fn get_near_greeting() -> Result<String, String> {
     let contract_id = config.testnet.contract_id;
 
     let provider = near_jsonrpc_client::JsonRpcClient::connect(rpc_url);
-    let account_id = AccountId::from_str(contract_id)
+    let account_id = AccountId::from_str(&contract_id)
         .map_err(|e| format!("Invalid account ID: {}", e))?;
 
     let args = serde_json::json!({});
@@ -43,7 +43,7 @@ pub async fn get_near_greeting() -> Result<String, String> {
             request: near_primitives::views::QueryRequest::CallFunction {
                 account_id,
                 method_name: "get_greeting".to_string(),
-                args: args.to_string().into_bytes(),
+                args: args.to_string().into_bytes().into(),
             },
         })
         .await
@@ -51,6 +51,7 @@ pub async fn get_near_greeting() -> Result<String, String> {
 
     if let near_jsonrpc_client::methods::query::RpcQueryResponse {
         kind: near_jsonrpc_primitives::types::query::QueryResponseKind::CallResult(result),
+        ..
     } = query_response
     {
         let result: GreetingResponse = serde_json::from_slice(&result.result)

@@ -23,16 +23,12 @@ pub struct CredentialResponse {
 
 #[derive(Debug, Deserialize)]
 struct RawCredential {
-    #[serde(rename = "implicit_account_id")]
-    account_id: String,
     #[serde(rename = "public_key")]
     public_key: String,
     #[serde(rename = "private_key")]
     private_key: String,
-    #[serde(rename = "seed_phrase_hd_path")]
-    _hd_path: Option<String>,
-    #[serde(rename = "master_seed_phrase")]
-    _seed_phrase: Option<String>,
+    #[serde(skip)]
+    _other: serde_json::Value,
 }
 
 #[tauri::command]
@@ -50,52 +46,59 @@ pub fn load_near_credentials() -> CredentialResponse {
 
     let mut credentials = Vec::new();
 
-    let entries = walkdir::WalkDir::new(near_credentials_dir)
+    let entries = std::fs::read_dir(&near_credentials_dir)
         .into_iter()
-        .filter_map(|e| e.ok())
-        .filter(|e| e.path().extension().and_then(|s| s.to_str()) == Some("json"));
+        .filter_map(|dir| dir.ok())
+        .filter(|entry| entry.file_type().map(|ft| ft.is_dir()).unwrap_or(false))
+        .filter(|entry| {
+            let name = entry.file_name();
+            let network = name.to_str().unwrap_or("");
+            network == "mainnet" || network == "testnet"
+        });
 
-    for entry in entries {
-        let path = entry.path();
-        let file_name = match path.file_stem().and_then(|s| s.to_str()) {
-            Some(name) => name,
-            None => {
-                log::warn!("Could not get file stem for {}", path.display());
-                continue;
-            }
-        };
-        
-        // Get the network from the parent directory name
-        let parent_dir = path.parent().unwrap();
-        let network = parent_dir.file_name().unwrap().to_str().unwrap();
-        
-        if network != "mainnet" && network != "testnet" {
-            log::warn!("Skipping file in unsupported network directory: {}", path.display());
-            continue;
-        }
+    for network_dir in entries {
+        let network = network_dir.file_name().to_str().unwrap_or("").to_string();
+        let network_path = network_dir.path();
 
-        // Use the account ID from the credential file instead of filename
-        log::info!("Attempting to read credentials file at {}", path.display());
-        if let Ok(content) = fs::read_to_string(&path) {
-            log::debug!("File content: {}", content);
-            match serde_json::from_str::<RawCredential>(&content) {
-                Ok(raw_cred) => {
-                    log::info!("Found valid {} credential: {}", network, raw_cred.account_id);
-                    credentials.push(NearCredential {
-                        account_id: raw_cred.account_id,
-                        public_key: raw_cred.public_key,
-                        network: network.to_string(),
-                        private_key: Some(raw_cred.private_key),
-                    });
-                }
-                Err(e) => {
-                    log::error!("Failed to parse {}: {}", path.display(), e);
-                    log::warn!("Problematic file content: {}", content);
+        if let Ok(files) = std::fs::read_dir(&network_path) {
+            for file in files {
+                if let Ok(file) = file {
+                    let path = file.path();
+                    if !path.is_file() || path.extension().and_then(|s| s.to_str()) != Some("json") {
+                        continue;
+                    }
+
+                    let account_id = match path.file_stem().and_then(|s| s.to_str()) {
+                        Some(name) => name.to_string(),
+                        None => {
+                            log::warn!("Could not get file stem for {}", path.display());
+                            continue;
+                        }
+                    };
+
+                    log::info!("Reading credentials for {} in {}", account_id, network);
+                    if let Ok(content) = fs::read_to_string(&path) {
+                        match serde_json::from_str::<RawCredential>(&content) {
+                            Ok(raw_cred) => {
+                                log::info!("Found valid {} credential for {}", network, account_id);
+                                credentials.push(NearCredential {
+                                    account_id,
+                                    public_key: raw_cred.public_key,
+                                    network: network.clone(),
+                                    private_key: Some(raw_cred.private_key),
+                                });
+                            }
+                            Err(e) => {
+                                log::error!("Failed to parse {}: {}", path.display(), e);
+                            }
+                        }
+                    } else {
+                        log::warn!("Failed to read credentials file at {}", path.display());
+                    }
                 }
             }
-        } else {
-            log::warn!("Failed to read credentials file at {}", path.display());
         }
+    }
     }
 
     CredentialResponse {

@@ -22,11 +22,16 @@ export function ProfileSelector({ onProfileChange, currentProfile, availableProf
         }}
         className="profile-select"
       >
-        {availableProfiles.map((profile) => (
-          <option key={`${profile.accountId}-${profile.network}`} value={`${profile.accountId}-${profile.network}`}>
-            {`${profile.accountId} (${profile.network})`}
-          </option>
-        ))}
+        {availableProfiles
+          .filter(profile => profile.network === currentProfile?.network)
+          .map((profile) => {
+            const displayName = profile.accountId.split('.').pop() || profile.accountId;
+            return (
+              <option key={`${profile.accountId}-${profile.network}`} value={`${profile.accountId}-${profile.network}`}>
+                {displayName}
+              </option>
+            );
+          })}
       </select>
     </div>
   );

@@ -27,10 +27,12 @@ function App() {
           return;
         }
 
-        const networkProfiles = response.credentials;
+        const networkProfiles = response.credentials.filter(cred => cred.network === network);
         setProfiles(networkProfiles);
-        if (networkProfiles.length > 0) {
-          setCurrentProfile(networkProfiles[0]);
+        
+        // Update current profile if it doesn't match the current network
+        if (currentProfile?.network !== network || !networkProfiles.find(p => p.accountId === currentProfile?.accountId)) {
+          setCurrentProfile(networkProfiles.length > 0 ? networkProfiles[0] : null);
         }
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown credential loading error';

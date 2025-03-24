@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::fs;
 use log;
+use std::path::PathBuf;
 
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -54,25 +55,40 @@ pub fn load_near_credentials() -> CredentialResponse {
             continue;
         }
 
-        if let Ok(entries) = fs::read_dir(&network_dir) {
-            for entry in entries.flatten() {
-                let path = entry.path();
-                if path.is_file() && path.extension().and_then(|s| s.to_str()) == Some("json") {
-                    if let Ok(content) = fs::read_to_string(&path) {
-                        log::info!("Successfully read credentials file at {}", path.display());
-                        if let Ok(raw_cred) = serde_json::from_str::<RawCredential>(&content).map_err(|e| {
-                            log::error!("JSON parsing failed for {}: {}\nFile content: {}", path.display(), e, content);
-                            e
-                        }) {
-                            credentials.push(NearCredential {
-                                account_id: raw_cred.account_id,
-                                public_key: raw_cred.public_key,
-                                network: network.to_string(),
-                                private_key: Some(raw_cred.private_key),
-                            });
-                        }
+        for entry in walkdir::WalkDir::new(network_dir)
+            .into_iter()
+            .filter_map(|e| e.ok())
+            .filter(|e| e.path().extension().and_then(|s| s.to_str()) == Some("json")) 
+        {
+            let path = entry.path();
+            if let Ok(content) = fs::read_to_string(&path) {
+                log::info!("Reading credentials file at {}", path.display());
+                match serde_json::from_str::<RawCredential>(&content) {
+                    Ok(raw_cred) => {
+                        let network_type = match network {
+                            "mainnet" => "mainnet",
+                            "testnet" => "testnet",
+                            _ => continue,
+                        };
+
+                        credentials.push(NearCredential {
+                            account_id: raw_cred.account_id,
+                            public_key: raw_cred.public_key,
+                            network: network_type.to_string(),
+                            private_key: Some(raw_cred.private_key),
+                        });
+                    }
+                    Err(e) => {
+                        log::error!(
+                            "Failed to parse {}: {}. Partial content: {}...",
+                            path.display(),
+                            e,
+                            content.chars().take(200).collect::<String>()
+                        );
                     }
                 }
+            } else {
+                log::warn!("Failed to read credentials file at {}", path.display());
             }
         }
     }

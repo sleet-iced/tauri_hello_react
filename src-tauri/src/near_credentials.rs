@@ -65,19 +65,17 @@ pub fn load_near_credentials() -> CredentialResponse {
             }
         };
         
-        let parts: Vec<&str> = file_name.split('.').collect();
-        if parts.len() < 2 {
-            log::warn!("Skipping file with invalid name: {}", path.display());
+        // Get the network from the parent directory name
+        let parent_dir = path.parent().unwrap();
+        let network = parent_dir.file_name().unwrap().to_str().unwrap();
+        
+        if network != "mainnet" && network != "testnet" {
+            log::warn!("Skipping file in unsupported network directory: {}", path.display());
             continue;
         }
-        
-        let network = parts.last().unwrap();
-        let account_name = parts[..parts.len() - 1].join(".");
-        
-        if network != &"mainnet" && network != &"testnet" {
-            log::warn!("Skipping file with unsupported network: {}", path.display());
-            continue;
-        }
+
+        // Use the full filename without .json extension as the account name
+        let account_name = file_name.to_string();
 
         // Skip files that don't match the expected network
         let parent_dir = path.parent().unwrap();

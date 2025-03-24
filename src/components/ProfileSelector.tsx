@@ -12,10 +12,9 @@ export function ProfileSelector({ onProfileChange, currentProfile, availableProf
   return (
     <div className="profile-selector">
       <select
-        value={currentProfile ? `${currentProfile.accountId}-${currentProfile.network}` : ''}
+        value={currentProfile ? currentProfile.accountId : ''}
         onChange={(e) => {
-          const [accountId, network] = e.target.value.split('-');
-          const selectedProfile = availableProfiles.find(p => p.accountId === accountId && p.network === network);
+          const selectedProfile = availableProfiles.find(p => p.accountId === e.target.value);
           if (selectedProfile) {
             onProfileChange(selectedProfile);
           }
@@ -23,13 +22,11 @@ export function ProfileSelector({ onProfileChange, currentProfile, availableProf
         className="profile-select"
       >
         {availableProfiles
-          .map((profile) => {
-            const displayName = `${profile.accountId}.${profile.network}`;
-            return (
-              <option key={`${profile.accountId}-${profile.network}`} value={`${profile.accountId}-${profile.network}`}>
-                {displayName}
-              </option>
-            );
+          .map((profile) => (
+            <option key={profile.accountId} value={profile.accountId}>
+              {profile.accountId}
+            </option>
+          ))
           })}
       </select>
     </div>

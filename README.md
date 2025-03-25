@@ -15,6 +15,11 @@ npx tsc --noEmit --jsx react
 cd src-tauri && cargo check
 # Build
 pnpm tauri build
+
+# Cargo comands
+cargo update
+cargo clean
+cargo check
 ```
 
 

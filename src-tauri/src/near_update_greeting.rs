@@ -102,7 +102,17 @@ pub async fn update_near_greeting(
         .await;
 
     match result {
-        Ok(_) => Ok("Successfully updated greeting".to_string()),
-        Err(e) => Err(format!("Failed to update greeting: {}", e))
+        Ok(outcome) => {
+            match outcome.status {
+                near_primitives::views::FinalExecutionStatus::SuccessValue(_) => {
+                    Ok("Successfully updated greeting".to_string())
+                }
+                near_primitives::views::FinalExecutionStatus::Failure(e) => {
+                    Err(format!("Transaction failed: {:?}", e))
+                }
+                status => Err(format!("Unexpected transaction status: {:?}", status))
+            }
+        }
+        Err(e) => Err(format!("Failed to submit transaction: {}", e))
     }
 }

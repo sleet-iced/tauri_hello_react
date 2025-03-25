@@ -4,6 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { NetworkSelector } from "./components/NetworkSelector";
 import { ProfileSelector } from "./components/ProfileSelector";
 import { loadNearCredentials, type NearCredential } from "./utils/near-credentials";
+import { UpdateGreeting } from "./components/UpdateGreeting";
 import "./App.css";
 
 function App() {
@@ -86,6 +87,7 @@ function App() {
         {nearGreeting && <p>Contract says: {nearGreeting}</p>}
         {error && <p className="error">{error}</p>}
       </div>
+      <UpdateGreeting currentProfile={currentProfile} network={network} />
     </main>
   );
 }

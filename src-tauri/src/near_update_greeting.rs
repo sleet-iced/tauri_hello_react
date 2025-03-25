@@ -52,7 +52,7 @@ pub async fn update_near_greeting(
         method_name: "set_greeting".to_string(),
         args: args.into(),
         gas: 30_000_000_000_000, // 30 TGas
-        deposit: Balance::from(0),
+        deposit: Balance::from(0u128),
     }));
 
     let block_hash = provider

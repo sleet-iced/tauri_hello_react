@@ -11,7 +11,7 @@ pub struct NearCredential {
     pub public_key: String,
     pub network: String,
     // Note: Network value must match TypeScript's 'mainnet'|'testnet' specification
-    #[serde(skip_serializing)]
+    #[serde(rename = "privateKey")]
     pub private_key: Option<String>,
 }
 

@@ -1,7 +1,6 @@
 use near_primitives::types::{AccountId, Balance};
 use near_jsonrpc_client::methods::broadcast_tx_commit::RpcBroadcastTxCommitRequest;
-use near_primitives::transaction::{Action, FunctionCallAction, Transaction, SignedTransaction};
-use near_primitives::types::Nonce;
+use near_primitives::transaction::{Action, FunctionCallAction, SignedTransaction, Transaction};
 use near_crypto::{InMemorySigner, SecretKey};
 use std::fs;
 use serde::Deserialize;
@@ -84,7 +83,7 @@ pub async fn update_near_greeting(
     };
 
     let transaction = Transaction {
-        signer_id: account,
+        signer_id: account.clone(),
         public_key: signer.public_key(),
         nonce: nonce + 1,
         receiver_id: contract_account_id,
@@ -92,7 +91,8 @@ pub async fn update_near_greeting(
         actions: vec![function_call_action],
     };
 
-    let signed_transaction = SignedTransaction::sign(transaction, &signer);
+    let signature = signer.sign(transaction.clone().into());
+    let signed_transaction = SignedTransaction::new(signature, transaction);
     let result = provider
         .call(RpcBroadcastTxCommitRequest { signed_transaction })
         .await;

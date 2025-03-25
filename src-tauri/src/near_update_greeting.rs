@@ -79,7 +79,7 @@ pub async fn update_near_greeting(
         block_hash: block_ref.header.hash,
         actions: vec![Action::FunctionCall(FunctionCallAction {
             method_name: "set_greeting".to_string(),
-            args: serde_json::json!({ "message": new_greeting })
+            args: serde_json::json!({ "greeting": new_greeting })
                 .to_string()
                 .into_bytes(),
             gas: 30_000_000_000_000, // 30 TGas

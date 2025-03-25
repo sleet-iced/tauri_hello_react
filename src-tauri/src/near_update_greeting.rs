@@ -1,14 +1,13 @@
 use near_primitives::types::AccountId;
-use near_primitives::views::{FinalExecutionStatus, QueryRequest};
-use near_primitives::transaction::{Action, FunctionCallAction, Transaction};
-use near_crypto::{InMemorySigner, SecretKey, Signer};
+use near_primitives::views::FinalExecutionStatus;
+use near_primitives::transaction::{Action, FunctionCallAction, SignedTransaction};
+use near_crypto::{InMemorySigner, SecretKey};
 use near_jsonrpc_client::JsonRpcClient;
 use std::str::FromStr;
 use std::fs;
 use serde::Deserialize;
 use near_primitives::types::{BlockReference, Finality};
-use near_jsonrpc_client::methods::broadcast_tx_commit::RpcBroadcastTxCommitRequest;
-use near_jsonrpc_client::methods::query::RpcQueryRequest;
+use near_primitives::transaction::Transaction;
 
 #[derive(Deserialize)]
 struct Config {
@@ -83,14 +82,14 @@ pub async fn update_near_greeting(
         nonce: current_nonce + 1,
         receiver_id: contract_account_id,
         block_hash,
-        actions: vec![Action::FunctionCall(FunctionCallAction {
+        actions: vec![Action::FunctionCall(Box::new(FunctionCallAction {
             method_name: "set_greeting".to_string(),
             args: serde_json::json!({ "greeting": new_greeting })
                 .to_string()
                 .into_bytes(),
             gas: 30_000_000_000_000, // 30 TGas
             deposit: 0,
-        })],
+        }))],
     };
     let signed_transaction = transaction.sign(&signer);
 

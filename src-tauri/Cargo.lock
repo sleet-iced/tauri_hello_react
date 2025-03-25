@@ -6106,6 +6106,7 @@ dependencies = [
  "dirs",
  "log",
  "near-api",
+ "near-crypto 0.29.1",
  "near-jsonrpc-client 0.6.0",
  "near-jsonrpc-primitives 0.17.0",
  "near-primitives 0.17.0",

@@ -1,13 +1,7 @@
-use near_primitives::types::AccountId;
-use near_primitives::views::FinalExecutionStatus;
-use near_primitives::transaction::{Action, FunctionCallAction, SignedTransaction};
-use near_crypto::{InMemorySigner, SecretKey};
-use near_jsonrpc_client::JsonRpcClient;
+use near_api::*;
 use std::str::FromStr;
 use std::fs;
 use serde::Deserialize;
-use near_primitives::types::{BlockReference, Finality};
-use near_primitives::transaction::Transaction;
 
 #[derive(Deserialize)]
 struct Config {
@@ -40,70 +34,20 @@ pub async fn update_near_greeting(
     let rpc_url = &network_config.rpc_url;
     let contract_id = &network_config.contract_id;
 
-    let client = JsonRpcClient::connect(rpc_url);
-    let signer_account_id = AccountId::from_str(&account_id)
-        .map_err(|e| format!("Invalid account ID: {}", e))?;
-    let contract_account_id = AccountId::from_str(&contract_id)
-        .map_err(|e| format!("Invalid contract ID: {}", e))?;
+    let near = Near::new(rpc_url);
+    let account = near.account_from_secret_key(&account_id, &private_key)
+        .map_err(|e| format!("Failed to create account: {}", e))?;
+    
+    let result = account.function_call(
+        contract_id.to_string(),
+        "set_greeting".to_string(),
+        serde_json::json!({ "greeting": new_greeting }).to_string().into_bytes(),
+        30_000_000_000_000, // 30 TGas
+        0, // deposit
+    ).await;
 
-    let secret_key = SecretKey::from_str(&private_key)
-        .map_err(|e| format!("Invalid private key: {}", e))?;
-    let signer = InMemorySigner::from_secret_key(signer_account_id.clone(), secret_key);
-
-    let block_hash = client
-        .call(near_jsonrpc_client::methods::block::RpcBlockRequest {
-            block_reference: BlockReference::Finality(Finality::Final),
-        })
-        .await
-        .map_err(|e| format!("Failed to fetch block hash: {}", e))?
-        .header
-        .hash;
-
-    let access_key_query_response = client
-        .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
-            block_reference: BlockReference::Finality(Finality::Final),
-            request: near_primitives::views::QueryRequest::ViewAccessKey {
-                account_id: signer_account_id.clone(),
-                public_key: signer.public_key(),
-            },
-        })
-        .await
-        .map_err(|e| format!("Failed to fetch access key: {}", e))?;
-
-    let current_nonce = if let near_jsonrpc_primitives::types::query::QueryResponseKind::AccessKey(access_key) = access_key_query_response.kind {
-        access_key.nonce
-    } else {
-        return Err("Failed to get current nonce".to_string());
-    };
-
-    let transaction = Transaction {
-        signer_id: signer_account_id.clone(),
-        public_key: signer.public_key().clone(),
-        nonce: current_nonce + 1,
-        receiver_id: contract_account_id,
-        block_hash,
-        actions: vec![Action::FunctionCall(Box::new(FunctionCallAction {
-            method_name: "set_greeting".to_string(),
-            args: serde_json::json!({ "greeting": new_greeting })
-                .to_string()
-                .into_bytes(),
-            gas: 30_000_000_000_000, // 30 TGas
-            deposit: 0,
-        }))],
-    };
-    let signed_transaction = transaction.sign(&signer);
-
-    let request = near_jsonrpc_client::methods::broadcast_tx_commit::RpcBroadcastTxCommitRequest {
-        signed_transaction,
-    };
-
-    match client.call(request).await {
-        Ok(outcome) => {
-            match outcome.status {
-                FinalExecutionStatus::SuccessValue(_) => Ok("Successfully updated greeting".to_string()),
-                status => Err(format!("Transaction failed: {:?}", status))
-            }
-        }
-        Err(e) => Err(format!("Failed to send transaction: {}", e)),
+    match result {
+        Ok(_) => Ok("Successfully updated greeting".to_string()),
+        Err(e) => Err(format!("Failed to update greeting: {}", e))
     }
 }

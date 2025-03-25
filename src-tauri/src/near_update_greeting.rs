@@ -1,4 +1,6 @@
-use near_primitives::types::{AccountId, FinalExecutionStatus};
+use near_primitives::types::AccountId;
+use near_primitives::views::FinalExecutionStatus;
+use near_crypto::Signer;
 use near_primitives::transaction::{Action, FunctionCallAction, Transaction};
 use near_crypto::{InMemorySigner, SecretKey};
 use near_jsonrpc_client::JsonRpcClient;
@@ -49,7 +51,7 @@ pub async fn update_near_greeting(
 
     let transaction = Transaction {
         signer_id: signer_account_id.clone(),
-        public_key: signer.public_key().clone(),
+        public_key: signer.public_key.clone(),
         nonce: 0, // Will be set by the RPC client
         receiver_id: contract_account_id,
         block_hash: Default::default(), // Will be set by the RPC client

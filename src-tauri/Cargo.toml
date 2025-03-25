@@ -31,4 +31,5 @@ near-crypto = "0.29.1"
 thiserror = "1.0"
 dirs = "6.0.0"
 walkdir = "2.5.0"
+near-api = "0.5.0"
 

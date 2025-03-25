@@ -1,6 +1,8 @@
 use near_primitives::types::{AccountId, Balance};
 use near_jsonrpc_client::methods::broadcast_tx_commit::RpcBroadcastTxCommitRequest;
 use near_primitives::transaction::{Action, FunctionCallAction, SignedTransaction, Transaction};
+use near_primitives::transaction::TransactionV0;
+use near_primitives::borsh::{self, BorshSerialize};
 use near_crypto::{InMemorySigner, SecretKey};
 use std::fs;
 use serde::Deserialize;
@@ -82,16 +84,18 @@ pub async fn update_near_greeting(
         return Err("Failed to get access key".to_string());
     };
 
-    let transaction = Transaction {
+    let transaction = Transaction::V0(TransactionV0 {
         signer_id: account.clone(),
         public_key: signer.public_key(),
         nonce: nonce + 1,
         receiver_id: contract_account_id,
         block_hash,
         actions: vec![function_call_action],
-    };
+    });
 
-    let signature = signer.sign(transaction.clone().into());
+    let transaction_bytes = borsh::to_vec(&transaction).map_err(|e| e.to_string())?;
+    let hash = near_primitives::hash::hash(&transaction_bytes);
+    let signature = signer.sign(hash.as_ref());
     let signed_transaction = SignedTransaction::new(signature, transaction);
     let result = provider
         .call(RpcBroadcastTxCommitRequest { signed_transaction })

@@ -1,4 +1,7 @@
 use near_primitives::types::AccountId;
+use near_jsonrpc_client::methods::query::RpcQueryRequest;
+use near_primitives::views::QueryRequest;
+use near_primitives::types::Finality;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use std::fs;
@@ -41,7 +44,6 @@ pub async fn get_near_greeting(network: String) -> Result<String, String> {
     let config_str = fs::read_to_string("src/network_config.toml").map_err(|e| e.to_string())?;
     let config: Config = toml::from_str(&config_str).map_err(|e| e.to_string())?;
 
-    // Get configuration based on selected network
     let network_config = match network.as_str() {
         "mainnet" => &config.mainnet,
         "testnet" => &config.testnet,
@@ -57,9 +59,9 @@ pub async fn get_near_greeting(network: String) -> Result<String, String> {
 
     let args = serde_json::json!({});
     let query_response = provider
-        .call(near_jsonrpc_client::methods::query::RpcQueryRequest {
-            block_reference: near_primitives::types::Finality::Final.into(),
-            request: near_primitives::views::QueryRequest::CallFunction {
+        .call(RpcQueryRequest {
+            block_reference: near_primitives::types::BlockReference::Finality(Finality::Final),
+            request: QueryRequest::CallFunction {
                 account_id,
                 method_name: "get_greeting".to_string(),
                 args: args.to_string().into_bytes().into(),
@@ -73,11 +75,9 @@ pub async fn get_near_greeting(network: String) -> Result<String, String> {
         ..
     } = query_response
     {
-        // Try to parse as JSON object first
         match serde_json::from_slice::<GreetingResponse>(&result.result) {
             Ok(response) => Ok(response.greeting),
             Err(_) => {
-                // If JSON parsing fails, try to parse as a plain string
                 match String::from_utf8(result.result.to_vec()) {
                     Ok(greeting) => Ok(greeting.trim_matches('"').to_string()),
                     Err(e) => Err(format!("Failed to parse response as string: {}", e))

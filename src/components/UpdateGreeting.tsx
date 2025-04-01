@@ -3,6 +3,14 @@ import { invoke } from '@tauri-apps/api/core';
 import { type NearCredential } from '../utils/near-credentials';
 import './UpdateGreeting.css';
 
+interface TransactionResult {
+  transaction_hash: string;
+  block_hash: string;
+  status: string;
+  gas_burnt: number;
+  message: string;
+}
+
 interface UpdateGreetingProps {
   currentProfile: NearCredential | null;
   network: 'mainnet' | 'testnet';
@@ -12,6 +20,7 @@ export function UpdateGreeting({ currentProfile, network }: UpdateGreetingProps)
   const [newGreeting, setNewGreeting] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [txResult, setTxResult] = useState<TransactionResult | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,15 +31,17 @@ export function UpdateGreeting({ currentProfile, network }: UpdateGreetingProps)
 
     setIsUpdating(true);
     setError(null);
+    setTxResult(null);
 
     try {
-      const result = await invoke<string>('update_near_greeting', {
+      const result = await invoke<TransactionResult>('update_near_greeting', {
         network,
         accountId: currentProfile.accountId,
         privateKey: currentProfile.privateKey,
         newGreeting,
       });
       setNewGreeting('');
+      setTxResult(result);
       console.log(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update greeting');
@@ -59,6 +70,17 @@ export function UpdateGreeting({ currentProfile, network }: UpdateGreetingProps)
         </button>
       </form>
       {error && <div className="error-message">{error}</div>}
+      {txResult && (
+        <div className={`transaction-result ${txResult.status.toLowerCase()}`}>
+          <h3>Transaction {txResult.status}</h3>
+          <p>{txResult.message}</p>
+          <div className="transaction-details">
+            <p><strong>Transaction Hash:</strong> {txResult.transaction_hash}</p>
+            <p><strong>Block Hash:</strong> {txResult.block_hash}</p>
+            <p><strong>Gas Burnt:</strong> {txResult.gas_burnt.toLocaleString()}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

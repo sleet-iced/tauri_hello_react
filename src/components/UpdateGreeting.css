@@ -45,3 +45,46 @@
   margin-top: 10px;
   font-size: 14px;
 }
+
+.transaction-result {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 6px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.transaction-result h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.transaction-result.success {
+  background-color: #e6f7e6;
+  border: 1px solid #c3e6cb;
+}
+
+.transaction-result.failed {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+}
+
+.transaction-result.unknown {
+  background-color: #fff3cd;
+  border: 1px solid #ffeeba;
+}
+
+.transaction-details {
+  margin-top: 15px;
+  font-size: 14px;
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.transaction-details p {
+  margin: 5px 0;
+  word-break: break-all;
+}

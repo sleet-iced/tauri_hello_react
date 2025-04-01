@@ -5,7 +5,7 @@ use near_primitives::transaction::TransactionV0;
 use near_primitives::borsh::{self, BorshSerialize};
 use near_crypto::{InMemorySigner, SecretKey};
 use std::fs;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
 #[derive(Deserialize)]
@@ -20,13 +20,22 @@ struct NetworkConfig {
     contract_id: String,
 }
 
+#[derive(Serialize)]
+pub struct TransactionResult {
+    transaction_hash: String,
+    block_hash: String,
+    status: String,
+    gas_burnt: u64,
+    message: String,
+}
+
 #[tauri::command]
 pub async fn update_near_greeting(
     network: String,
     account_id: String,
     private_key: String,
     new_greeting: String,
-) -> Result<String, String> {
+) -> Result<TransactionResult, String> {
     let config_str = fs::read_to_string("src/network_config.toml").map_err(|e| e.to_string())?;
     let config: Config = toml::from_str(&config_str).map_err(|e| e.to_string())?;
 
@@ -103,14 +112,40 @@ pub async fn update_near_greeting(
 
     match result {
         Ok(outcome) => {
+            let transaction_hash = format!("{}", outcome.transaction.hash);
+            let block_hash = format!("{}", outcome.transaction_outcome.block_hash);
+            let gas_burnt = outcome.transaction_outcome.outcome.gas_burnt;
+            
             match outcome.status {
                 near_primitives::views::FinalExecutionStatus::SuccessValue(_) => {
-                    Ok("Successfully updated greeting".to_string())
+                    Ok(TransactionResult {
+                        transaction_hash,
+                        block_hash,
+                        status: "Success".to_string(),
+                        gas_burnt,
+                        message: "Successfully updated greeting".to_string(),
+                    })
                 }
                 near_primitives::views::FinalExecutionStatus::Failure(e) => {
-                    Err(format!("Transaction failed: {:?}", e))
+                    let error_message = format!("Transaction failed: {:?}", e);
+                    Ok(TransactionResult {
+                        transaction_hash,
+                        block_hash,
+                        status: "Failed".to_string(),
+                        gas_burnt,
+                        message: error_message,
+                    })
                 }
-                status => Err(format!("Unexpected transaction status: {:?}", status))
+                status => {
+                    let error_message = format!("Unexpected transaction status: {:?}", status);
+                    Ok(TransactionResult {
+                        transaction_hash,
+                        block_hash,
+                        status: "Unknown".to_string(),
+                        gas_burnt,
+                        message: error_message,
+                    })
+                }
             }
         }
         Err(e) => Err(format!("Failed to submit transaction: {}", e))

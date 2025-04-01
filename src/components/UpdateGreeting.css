@@ -64,24 +64,29 @@
 .transaction-result.success {
   background-color: #e6f7e6;
   border: 1px solid #c3e6cb;
+  color: #155724;
 }
 
 .transaction-result.failed {
   background-color: #f8d7da;
   border: 1px solid #f5c6cb;
+  color: #721c24;
 }
 
 .transaction-result.unknown {
   background-color: #fff3cd;
   border: 1px solid #ffeeba;
+  color: #856404;
 }
 
 .transaction-details {
   margin-top: 15px;
   font-size: 14px;
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.8);
   padding: 10px;
   border-radius: 4px;
+  color: #333333;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .transaction-details p {

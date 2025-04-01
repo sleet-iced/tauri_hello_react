@@ -21,7 +21,14 @@ export function UpdateGreeting({ currentProfile, network }: UpdateGreetingProps)
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [txResult, setTxResult] = useState<TransactionResult | null>(null);
+  const [showPreview, setShowPreview] = useState(true);
 
+  // Contract details based on network
+  const contractId = network === 'mainnet' ? 'hello.sleet.near' : 'hello.sleet.testnet';
+  const methodName = 'set_greeting';
+  const gasAllocation = '30 TGas (30,000,000,000,000)';
+  const deposit = '0 NEAR';
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentProfile?.privateKey) {
@@ -70,6 +77,23 @@ export function UpdateGreeting({ currentProfile, network }: UpdateGreetingProps)
         </button>
       </form>
       {error && <div className="error-message">{error}</div>}
+      
+      {newGreeting.trim() && (
+        <div className="greeting-preview">
+          <h3>Transaction Preview</h3>
+          <div className="preview-content">
+            <p><strong>New Greeting:</strong> {newGreeting}</p>
+          </div>
+          <div className="transaction-details">
+            <p><strong>Network:</strong> {network}</p>
+            <p><strong>From Account:</strong> {currentProfile?.accountId || 'No account selected'}</p>
+            <p><strong>Contract:</strong> {contractId}</p>
+            <p><strong>Method:</strong> {methodName}</p>
+            <p><strong>Gas Allocation:</strong> {gasAllocation}</p>
+            <p><strong>Deposit:</strong> {deposit}</p>
+          </div>
+        </div>
+      )}
       {txResult && (
         <div className={`transaction-result ${txResult.status.toLowerCase()}`}>
           <h3>Transaction {txResult.status}</h3>

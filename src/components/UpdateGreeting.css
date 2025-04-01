@@ -79,6 +79,34 @@
   color: #856404;
 }
 
+.greeting-preview {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 6px;
+  width: 100%;
+  max-width: 500px;
+  background-color: #e6f7ff;
+  border: 1px solid #91d5ff;
+  color: #0070cc;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.greeting-preview h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.preview-content {
+  margin-top: 10px;
+  font-size: 16px;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 15px;
+  border-radius: 4px;
+  color: #333333;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
 .transaction-details {
   margin-top: 15px;
   font-size: 14px;

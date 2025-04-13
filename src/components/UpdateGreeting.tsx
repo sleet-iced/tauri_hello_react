@@ -21,7 +21,7 @@ export function UpdateGreeting({ currentProfile, network }: UpdateGreetingProps)
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [txResult, setTxResult] = useState<TransactionResult | null>(null);
-  const [showPreview, setShowPreview] = useState(true);
+  // const [showPreview, setShowPreview] = useState(true);
 
   // Contract details based on network
   const contractId = network === 'mainnet' ? 'hello.sleet.near' : 'hello.sleet.testnet';

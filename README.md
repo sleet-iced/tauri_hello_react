@@ -23,6 +23,13 @@ cargo clean
 cargo check
 ```
 
+mobile
+```sh
+pnpm tauri android init
+pnpm tauri android dev
+pnpm tauri icon src-tauri/icons/icon.png
+pnpm tauri android build --aab
+```
 
 
 ---
